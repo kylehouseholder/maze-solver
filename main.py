@@ -6,6 +6,6 @@ def main():
 
     maze = Maze(10, 15, 20, 30, 30, 30, win)
 
-    win.wait_for_close()
+    win.awaitClose()
 
 main()

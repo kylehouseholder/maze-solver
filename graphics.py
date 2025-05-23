@@ -13,7 +13,7 @@ class Window:
         self.__root.update_idletasks()
         self.__root.update()
 
-    def wait_for_close(self):
+    def awaitClose(self):
         self.__running = True
         while self.__running:
             self.redraw()
@@ -22,7 +22,7 @@ class Window:
     def close(self):
         self.__running = False
     
-    def draw_line(self, line, fill_color="white"):
+    def drawLine(self, line, fill_color="white"):
         line.draw(self.__canvas, fill_color)
 
 class Point:
@@ -41,4 +41,3 @@ class Line:
             self.pt2.x, self.pt2.y, 
             fill=fill_color,
             width=2)
-

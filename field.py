@@ -3,7 +3,7 @@ from time import sleep
 
 class Maze:
     def __init__(self, x1, y1, numberOfRows, numberOfColumns,
-    cellWidth, cellHeight, window = None):
+    cellWidth, cellHeight, window=None, seed=None):
         self.__x1, self.__y1 = x1, y1
         self.__nRows = numberOfRows
         self.__nCols = numberOfColumns
@@ -13,6 +13,8 @@ class Maze:
         self.__cells = []
         self.__buildMaze()
         self.__breakEnds()
+        if seed:
+            random.seed(seed)
 
     def __buildMaze(self):
         for row in range(self.__nRows):
@@ -53,8 +55,6 @@ class Cell:
         self.__x2, self.__y2 = -1, -1
 
     def draw(self, x1, y1, x2, y2):
-        if not self.__win:
-            return
         self.__x1, self.__y1 = x1, y1
         self.__x2, self.__y2 = x2, y2
         self.__width = self.__x2 - self.__x1
@@ -63,31 +63,22 @@ class Cell:
             self.__x1 + (self.__width / 2),
             self.__y1 + (self.__height / 2)
         )
-        if self.hasLeftWall and self.__win:
-            self.__win.draw_line(Line(Point(x1, y1), Point(x1, y2)))
-        else:
-            self.__win.draw_line(Line(Point(x1, y1),
-                                      Point(x1, y2)), "black")
-        if self.hasRightWall and self.__win:
-            self.__win.draw_line(Line(Point(x2, y1), Point(x2, y2)))
-        else:
-            self.__win.draw_line(Line(Point(x2, y1),
-                                      Point(x2, y2)), "black")
-        if self.hasBottomWall and self.__win:
-            self.__win.draw_line(Line(Point(x1, y2), Point(x2, y2)))
-        else:
-            self.__win.draw_line(Line(Point(x1, y2),
-                                      Point(x2, y2)), "black")
-        if self.hasTopWall and self.__win:
-            self.__win.draw_line(Line(Point(x1, y1), Point(x2, y1)))
-        else:
-            self.__win.draw_line(Line(Point(x1, y1),
-                                      Point(x2, y1)), "black")
+        if not self.__win:
+            return
+        
+        def wallToggle(point1, point2, wallExists):
+            if wallExists:
+                self.__win.drawLine(Line(point1, point2))
+            else:
+                self.__win.drawLine(Line(point1, point2), "black")
+        wallToggle(Point(x1, y1), Point(x1, y2), self.hasLeftWall)
+        wallToggle(Point(x2, y1), Point(x2, y2), self.hasRightWall)
+        wallToggle(Point(x1, y2), Point(x2, y2), self.hasBottomWall)
+        wallToggle(Point(x1, y1), Point(x2, y1), self.hasTopWall)
 
-
-    def draw_move(self, to_cell, undo=False):
+    def path(self, to_cell, undo=False):
         color = "green"
         if undo:
             color = "red"
         if self.__win:
-            self.__win.draw_line(Line(self.ctr, to_cell.ctr), color)
+            self.__win.drawLine(Line(self.ctr, to_cell.ctr), color)
