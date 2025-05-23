@@ -1,9 +1,11 @@
-from graphics import Window, Point, Line
+from graphics import Point, Line
 from time import sleep
+import random
+
 
 class Maze:
     def __init__(self, x1, y1, numberOfRows, numberOfColumns,
-    cellWidth, cellHeight, window=None, seed=None):
+                 cellWidth, cellHeight, window=None, seed=None):
         self.__x1, self.__y1 = x1, y1
         self.__nRows = numberOfRows
         self.__nCols = numberOfColumns
@@ -46,6 +48,7 @@ class Maze:
             self.__win.redraw()
         sleep(0.0025)
 
+
 class Cell:
     def __init__(self, window):
         self.__win = window
@@ -53,6 +56,7 @@ class Cell:
         self.hasTopWall, self.hasBottomWall = True, True
         self.__x1, self.__y1 = -1, -1
         self.__x2, self.__y2 = -1, -1
+        self.visited = False
 
     def draw(self, x1, y1, x2, y2):
         self.__x1, self.__y1 = x1, y1
@@ -63,14 +67,14 @@ class Cell:
             self.__x1 + (self.__width / 2),
             self.__y1 + (self.__height / 2)
         )
-        if not self.__win:
-            return
-        
+
         def wallToggle(point1, point2, wallExists):
-            if wallExists:
-                self.__win.drawLine(Line(point1, point2))
-            else:
-                self.__win.drawLine(Line(point1, point2), "black")
+            if self.__win:
+                if wallExists:
+                    self.__win.drawLine(Line(point1, point2))
+                else:
+                    self.__win.drawLine(Line(point1, point2), "black")
+
         wallToggle(Point(x1, y1), Point(x1, y2), self.hasLeftWall)
         wallToggle(Point(x2, y1), Point(x2, y2), self.hasRightWall)
         wallToggle(Point(x1, y2), Point(x2, y2), self.hasBottomWall)
