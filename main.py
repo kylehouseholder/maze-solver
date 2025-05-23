@@ -1,19 +1,10 @@
 from graphics import Window, Point, Line
+from field import Cell, Maze
 
 def main():
-    win = Window(800,600)
+    win = Window(920, 630)
 
-    l0 = Line(Point(120,120), Point(440,440))
-    win.draw_line(l0, "white")
-
-    l1 = Line(Point(125, 125), Point(170, 450))
-    win.draw_line(l1, "green")
-
-    l2 = Line(Point(777, 222), Point(172, 454))
-    win.draw_line(l2, "blue")
-
-
-
+    maze = Maze(10, 15, 20, 30, 30, 30, win)
 
     win.wait_for_close()
 
