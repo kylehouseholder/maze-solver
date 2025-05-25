@@ -64,9 +64,9 @@ class Maze:
                 neighbors.append(("up", row - 1, col))
             if col > 0 and not self.__cells[row][col - 1].visited:
                 neighbors.append(("left", row, col - 1))
-            if row < self.__nRows - 1 and not self.__cells[row + 1][col].visited:
+            if row < (self.__nRows - 1) and not self.__cells[row + 1][col].visited:
                 neighbors.append(("down", row + 1, col))
-            if col < self.__nCols - 1 and not self.__cells[row][col + 1].visited:
+            if col < (self.__nCols - 1) and not self.__cells[row][col + 1].visited:
                 neighbors.append(("right", row, col + 1))
 
             if not neighbors:
@@ -94,6 +94,74 @@ class Maze:
             for cell in row:
                 cell.visited = False
 
+    def solve(self):
+        return self.__solver(0, 0)
+
+    def __solver(self, row, col):
+        self.__animate()
+        moves = ["right", "left", "up", "down"]
+        currentCell = self.__cells[row][col]
+        currentCell.visited = True
+        exitCell = self.__cells[self.__nRows - 1][self.__nCols - 1]
+
+        if currentCell == exitCell:
+            return True
+
+        sleep(self.__sec * 35)
+        for move in moves:
+            if move == "right" and col < (self.__nCols - 1):
+                nextRow, nextCol = row, col + 1
+                nextCell = self.__cells[nextRow][nextCol]
+                if (
+                    currentCell.hasRightWall == False and 
+                    nextCell.hasLeftWall == False and 
+                    nextCell.visited == False
+                ):
+                    currentCell.path(nextCell)
+                    if self.__solver(nextRow, nextCol):
+                        return True
+                    else:
+                        currentCell.path(nextCell, undo = True)
+            if move == "left" and col > 0:
+                nextRow, nextCol = row, col - 1
+                nextCell = self.__cells[nextRow][nextCol]
+                if (
+                    currentCell.hasLeftWall == False and 
+                    nextCell.hasRightWall == False and 
+                    nextCell.visited == False
+                ):
+                    currentCell.path(nextCell)
+                    if self.__solver(nextRow, nextCol):
+                        return True
+                    else:
+                        currentCell.path(nextCell, undo = True)
+            if move == "up" and row > 0:
+                nextRow, nextCol = row - 1, col
+                nextCell = self.__cells[nextRow][nextCol]
+                if (
+                    currentCell.hasTopWall == False and 
+                    nextCell.hasBottomWall == False and 
+                    nextCell.visited == False
+                ):
+                    currentCell.path(nextCell)
+                    if self.__solver(nextRow, nextCol):
+                        return True
+                    else:
+                        currentCell.path(nextCell, undo = True)
+            if move == "down" and row < (self.__nRows - 1):
+                nextRow, nextCol = row + 1, col
+                nextCell = self.__cells[nextRow][nextCol]
+                if (
+                    currentCell.hasBottomWall == False and 
+                    nextCell.hasTopWall == False and 
+                    nextCell.visited == False
+                ):
+                    currentCell.path(nextCell)
+                    if self.__solver(nextRow, nextCol):
+                        return True
+                    else:
+                        currentCell.path(nextCell, undo = True)
+        return False
 
 class Cell:
     def __init__(self, window, row, col):
