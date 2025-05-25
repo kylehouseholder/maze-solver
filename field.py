@@ -4,8 +4,10 @@ import random
 
 
 class Maze:
-    def __init__(self, x1, y1, numberOfRows, numberOfColumns,
-                 cellWidth, cellHeight, window=None, seed=None):
+    def __init__(self, x1, y1,
+                 numberOfRows, numberOfColumns,
+                 cellWidth, cellHeight, time=0.005,
+                 window=None, seed=None):
         if seed is not None:
             random.seed(seed)
         self.__x1, self.__y1 = x1, y1
@@ -14,15 +16,17 @@ class Maze:
         self.__cellH = cellHeight
         self.__cellW = cellWidth
         self.__win = window
+        self.__sec = time
         self.__cells = []
         self.__buildMaze()
         self.__breakEnds()
         self.__breakWalls(0, 0)
+        self.__resetCells()
 
     def __animate(self):
         if self.__win:
             self.__win.redraw()
-        sleep(0.0025)
+        sleep(self.__sec)
 
     def __buildMaze(self):
         for row in range(self.__nRows):
@@ -84,6 +88,12 @@ class Maze:
             self.__drawCell(row, col)
             self.__drawCell(nextRow, nextCol)
             self.__breakWalls(nextRow, nextCol)
+
+    def __resetCells(self):
+        for row in self.__cells:
+            for cell in row:
+                cell.visited = False
+
 
 class Cell:
     def __init__(self, window, row, col):
