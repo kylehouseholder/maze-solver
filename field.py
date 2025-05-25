@@ -1,4 +1,4 @@
-from graphics import Point, Line
+from graphics import Window, Point, Line
 from time import sleep
 import random
 
@@ -7,11 +7,11 @@ class Maze:
     def __init__(self, x1, y1, numberOfRows, numberOfColumns,
                  cellWidth, cellHeight, window=None, seed=None):
         self.__x1, self.__y1 = x1, y1
-        self.__nRows = numberOfRows
-        self.__nCols = numberOfColumns
-        self.__cellH = cellHeight
-        self.__cellW = cellWidth
-        self.__win = window
+        self.__nRows: int = numberOfRows
+        self.__nCols: int = numberOfColumns
+        self.__cellH: int = cellHeight
+        self.__cellW: int = cellWidth
+        self.__win: Window = window
         self.__cells = []
         self.__buildMaze()
         self.__breakEnds()
