@@ -7,16 +7,16 @@ class Maze:
     def __init__(self, x1, y1, numberOfRows, numberOfColumns,
                  cellWidth, cellHeight, window=None, seed=None):
         self.__x1, self.__y1 = x1, y1
-        self.__nRows: int = numberOfRows
-        self.__nCols: int = numberOfColumns
-        self.__cellH: int = cellHeight
-        self.__cellW: int = cellWidth
-        self.__win: Window = window
+        self.__nRows = numberOfRows
+        self.__nCols = numberOfColumns
+        self.__cellH = cellHeight
+        self.__cellW = cellWidth
+        self.__win = window
         self.__cells = []
         self.__buildMaze()
         self.__breakEnds()
         if seed:
-            random.seed(seed)
+            random.seed(a=seed)
 
     def __buildMaze(self):
         for row in range(self.__nRows):
@@ -38,10 +38,10 @@ class Maze:
 
     def __breakEnds(self):
         self.__cells[0][0].hasTopWall = False
-        self.__drawCell(0, 0)
+        self.__drawCell(row=0, col=0)
         exitCell = self.__cells[self.__nRows - 1][self.__nCols - 1]
         exitCell.hasBottomWall = False
-        self.__drawCell(self.__nRows - 1, self.__nCols - 1)
+        self.__drawCell(row=self.__nRows - 1, col=self.__nCols - 1)
 
     def __animate(self):
         if self.__win:
