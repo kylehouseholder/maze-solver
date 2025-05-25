@@ -6,6 +6,8 @@ import random
 class Maze:
     def __init__(self, x1, y1, numberOfRows, numberOfColumns,
                  cellWidth, cellHeight, window=None, seed=None):
+        if seed is not None:
+            random.seed(seed)
         self.__x1, self.__y1 = x1, y1
         self.__nRows = numberOfRows
         self.__nCols = numberOfColumns
@@ -15,14 +17,18 @@ class Maze:
         self.__cells = []
         self.__buildMaze()
         self.__breakEnds()
-        if seed:
-            random.seed(a=seed)
+        self.__breakWalls(0, 0)
+
+    def __animate(self):
+        if self.__win:
+            self.__win.redraw()
+        sleep(0.0025)
 
     def __buildMaze(self):
         for row in range(self.__nRows):
             rowCells = []
             for col in range(self.__nCols):
-                rowCells.append(Cell(self.__win))
+                rowCells.append(Cell(self.__win, row, col))
             self.__cells.append(rowCells)
         for row in range(self.__nRows):
             for col in range(self.__nCols):
@@ -38,22 +44,54 @@ class Maze:
 
     def __breakEnds(self):
         self.__cells[0][0].hasTopWall = False
-        self.__drawCell(row=0, col=0)
+        self.__drawCell(0, 0)
         exitCell = self.__cells[self.__nRows - 1][self.__nCols - 1]
         exitCell.hasBottomWall = False
-        self.__drawCell(row=self.__nRows - 1, col=self.__nCols - 1)
+        self.__drawCell(self.__nRows - 1, self.__nCols - 1)
 
-    def __animate(self):
-        if self.__win:
-            self.__win.redraw()
-        sleep(0.0025)
+    def __breakWalls(self, row, col):
+        currentCell = self.__cells[row][col]
+        currentCell.visited = True
 
+        while True:
+            neighbors = []
+
+            if row > 0 and not self.__cells[row - 1][col].visited:
+                neighbors.append(("up", row - 1, col))
+            if col > 0 and not self.__cells[row][col - 1].visited:
+                neighbors.append(("left", row, col - 1))
+            if row < self.__nRows - 1 and not self.__cells[row + 1][col].visited:
+                neighbors.append(("down", row + 1, col))
+            if col < self.__nCols - 1 and not self.__cells[row][col + 1].visited:
+                neighbors.append(("right", row, col + 1))
+
+            if not neighbors:
+                self.__drawCell(row, col)
+                return
+
+            direction, nextRow, nextCol = random.choice(neighbors)
+            nextCell = self.__cells[nextRow][nextCol]
+
+            if direction == "left":
+                currentCell.hasLeftWall, nextCell.hasRightWall = False, False
+            elif direction == "right":
+                currentCell.hasRightWall, nextCell.hasLeftWall = False, False
+            elif direction == "up":
+                currentCell.hasTopWall, nextCell.hasBottomWall = False, False
+            elif direction == "down":
+                currentCell.hasBottomWall, nextCell.hasTopWall = False, False
+
+            self.__drawCell(row, col)
+            self.__drawCell(nextRow, nextCol)
+            self.__breakWalls(nextRow, nextCol)
 
 class Cell:
-    def __init__(self, window):
+    def __init__(self, window, row, col):
         self.__win = window
         self.hasLeftWall, self.hasRightWall = True, True
         self.hasTopWall, self.hasBottomWall = True, True
+        self.row = row
+        self.col = col
         self.__x1, self.__y1 = -1, -1
         self.__x2, self.__y2 = -1, -1
         self.visited = False
