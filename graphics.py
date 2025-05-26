@@ -11,13 +11,13 @@ class Window:
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
         
-        # Add keyboard handling
         self.__root.focus_set()
         self.__root.bind("<Key>", self.keyHandler)
         self.__keyCallback = None
 
+        self.playerID = None
+
     def setKeyCallback(self, callbackFunction):
-        """Allow someone else to register for key events"""
         self.__keyCallback = callbackFunction
 
     def keyHandler(self, event):
@@ -33,6 +33,15 @@ class Window:
     def redraw(self):
         self.__root.update_idletasks()
         self.__root.update()
+    
+    def clearPlayer(self):
+        self.__canvas.delete(self.playerID)
+
+    def drawLine(self, line, fill_color="white"):
+        line.draw(self.__canvas, fill_color)
+
+    def drawPlayer(self, x, y, width, color):
+        self.playerID = self.__canvas.create_oval(x, y, x + width, y + width, fill=color)
 
     def awaitClose(self):
         self.__running = True
@@ -42,12 +51,6 @@ class Window:
 
     def close(self):
         self.__running = False
-
-    def drawLine(self, line, fill_color="white"):
-        line.draw(self.__canvas, fill_color)
-
-    def drawPlayer(self, x, y, width, color):
-        self.__canvas.create_oval(x, y, x + width, y + width, fill=color)
 
 
 class Point:
