@@ -186,8 +186,8 @@ class Maze:
     
     def playerMove(self, direction):
         print(f"Moving {direction}...")
-        self.__win.clearPlayer()
-        self.__player.move(direction)
+        if self.__player.isMoveValid(direction):
+            self.__player.move(direction)
         self.__animate()
         self.__win.redraw()
     
@@ -245,7 +245,7 @@ class Player:
         self.row = 0
         self.col = 0
         self.color = "blue"
-        self.size = 15
+        self.size = 24
         self.maze = maze
         self.currentCell = self.maze.cells[self.row][self.col]
         self.draw()
@@ -264,18 +264,23 @@ class Player:
     
     def move(self, direction):
         if self.isMoveValid(direction):
-            if direction == Move.UP:
+            oldPosition = self.getPosition()
+            
+            if direction == "up":
                 self.row -= 1
-            elif direction == Move.DOWN:
+            elif direction == "down":
                 self.row += 1
-            elif direction == Move.LEFT:
+            elif direction == "left":
                 self.col -= 1
-            elif direction == Move.RIGHT:
+            elif direction == "right":
                 self.col += 1
             
             self.currentCell = self.maze.cells[self.row][self.col]
-            self.currentCell.tried += 1
-            self.draw()
+            self.currentCell.tried = Tried.YES
+            
+            newPosition = self.getPosition()
+            self.window.animatePlayer(oldPosition, newPosition)
+            
             print(f"Move: ({self.row}, {self.col})")
             print(f"Cell walls - Top: {self.currentCell.hasTopWall}")
             print(f"Bottom: {self.currentCell.hasBottomWall}")
@@ -286,28 +291,40 @@ class Player:
             print(f"Current cell: ({self.row}, {self.col})")
 
     def isMoveValid(self, direction):
-        if direction == Move.UP:
-            if self.row > 0 and not self.currentCell.hasTopWall:
-                return True
-            else:
+        if direction == "up":
+            if self.row <= 0:
+                print(f"Invalid move {direction}, already at top edge of maze.")
+                return False
+            elif self.currentCell.hasTopWall:
                 print(f"Invalid move {direction}, blocked by top wall.")
-                print(f"This cell has a top wall: {self.currentCell.hasTopWall}")
-        elif direction == Move.DOWN:
-            if self.row < self.maze.nRows - 1 and not self.currentCell.hasBottomWall:
-                return True
+                return False
             else:
+                return True
+        elif direction == "down":
+            if self.row >= self.maze.nRows - 1:
+                print(f"Invalid move {direction}, already at bottom edge of maze.")
+                return False
+            elif self.currentCell.hasBottomWall:
                 print(f"Invalid move {direction}, blocked by bottom wall.")
-                print(f"This cell has a bottom wall: {self.currentCell.hasBottomWall}")
-        elif direction == Move.LEFT:
-            if self.col > 0 and not self.currentCell.hasLeftWall:
-                return True
+                return False
             else:
+                return True
+        elif direction == "left":
+            if self.col <= 0:
+                print(f"Invalid move {direction}, already at left edge of maze.")
+                return False
+            elif self.currentCell.hasLeftWall:
                 print(f"Invalid move {direction}, blocked by left wall.")
-                print(f"This cell has a left wall: {self.currentCell.hasLeftWall}")
-        elif direction == Move.RIGHT:
-            if self.col < self.maze.nCols - 1 and not self.currentCell.hasRightWall:
-                return True
+                return False
             else:
+                return True
+        elif direction == "right":
+            if self.col >= self.maze.nCols - 1:
+                print(f"Invalid move {direction}, already at right edge of maze.")
+                return False
+            elif self.currentCell.hasRightWall:
                 print(f"Invalid move {direction}, blocked by right wall.")
-                print(f"This cell has a right wall: {self.currentCell.hasRightWall}")
+                return False
+            else:
+                return True
         return False

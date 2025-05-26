@@ -1,5 +1,6 @@
+import time
+import math
 from tkinter import Tk, BOTH, Canvas
-
 
 class Window:
     def __init__(self, width, height):
@@ -17,6 +18,13 @@ class Window:
 
         self.playerID = None
 
+        self.startPos = None
+        self.endPos = None
+        self.animationProgress = 0.0
+        self.animationStartTime = None
+        self.animationDuration = 0.222  # seconds
+        self.isAnimating = False
+
     def setKeyCallback(self, callbackFunction):
         self.__keyCallback = callbackFunction
 
@@ -28,24 +36,57 @@ class Window:
             event.keysym == "Right"
         ):
             if self.__keyCallback:
-                self.__keyCallback(event.keysym)
+                direction = event.keysym.lower()
+                self.__keyCallback(direction)
 
     def redraw(self):
         self.__root.update_idletasks()
         self.__root.update()
     
-    def clearPlayer(self):
-        self.__canvas.delete(self.playerID)
+    def animatePlayer(self, startPos, endPos):
+        self.startPos = startPos
+        self.endPos = endPos
+        self.animationProgress = 0.0
+        self.animationStartTime = time.time()
+        self.isAnimating = True
+
+        self.redraw()
+
+    def updateAnimation(self):
+        if not self.isAnimating:
+            return
+
+        elapsed = time.time() - self.animationStartTime
+        if elapsed >= self.animationDuration:
+            self.isAnimating = False
+            # Draw player at final position
+            self.drawPlayer(self.endPos.x - 12, self.endPos.y - 12, 24, "blue")
+            return
+
+        self.animationProgress = elapsed / self.animationDuration
+
+        x = self.startPos.x + (self.endPos.x - self.startPos.x) * self.calcEasing(self.animationProgress)
+        y = self.startPos.y + (self.endPos.y - self.startPos.y) * self.calcEasing(self.animationProgress)
+
+        # Draw player at interpolated position (offset by half size to center)
+        self.drawPlayer(x - 12, y - 12, 24, "blue")
+    
+    def calcEasing(self, progress):
+        return 0.5 - math.cos(progress * math.pi) / 2
 
     def drawLine(self, line, fill_color="white"):
         line.draw(self.__canvas, fill_color)
 
     def drawPlayer(self, x, y, width, color):
-        self.playerID = self.__canvas.create_oval(x, y, x + width, y + width, fill=color)
+        if self.playerID is None:
+            self.playerID = self.__canvas.create_oval(x, y, x + width, y + width, fill=color)
+        else:
+            self.__canvas.coords(self.playerID, x, y, x + width, y + width)
 
     def awaitClose(self):
         self.__running = True
         while self.__running:
+            self.updateAnimation()
             self.redraw()
         print("Window closed...")
 
