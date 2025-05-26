@@ -20,15 +20,14 @@ class Tried(Enum):
 class Maze:
     def __init__(self, x1, y1,
                  numberOfRows, numberOfColumns,
-                 cellWidth, cellHeight, time=0.005,
+                 cellSize, time=0.005,
                  window=None, seed=None):
         if seed is not None:
             random.seed(seed)
         self.__x1, self.__y1 = x1, y1
         self.nRows = numberOfRows
         self.nCols = numberOfColumns
-        self.__cellH = cellHeight
-        self.__cellW = cellWidth
+        self.cellSize = cellSize
         self.__win = window
         self.__sec = time
         self.cells = []
@@ -57,10 +56,10 @@ class Maze:
                 self.__drawCell(row, col)
 
     def __drawCell(self, row, col):
-        cx1 = col * self.__cellW + self.__x1
-        cx2 = cx1 + self.__cellW
-        cy1 = row * self.__cellH + self.__y1
-        cy2 = cy1 + self.__cellH
+        cx1 = col * self.cellSize + self.__x1
+        cx2 = cx1 + self.cellSize
+        cy1 = row * self.cellSize + self.__y1
+        cy2 = cy1 + self.cellSize
         self.cells[row][col].draw(cx1, cy1, cx2, cy2)
         self.__animate()
 
@@ -185,17 +184,20 @@ class Maze:
         return self.__player
     
     def playerMove(self, direction):
+        if self.__win.isBouncing:
+            print(f"Input blocked (bouncing)")
+            return
+            
         print(f"Moving {direction}...")
-        if self.__player.isMoveValid(direction):
-            self.__player.move(direction)
+        self.__player.move(direction)
         self.__animate()
         self.__win.redraw()
     
     def __drawCellWalls(self, row, col):
-        x1 = col * self.__cellW + self.__x1
-        x2 = x1 + self.__cellW
-        y1 = row * self.__cellH + self.__y1
-        y2 = y1 + self.__cellH
+        x1 = col * self.cellSize + self.__x1
+        x2 = x1 + self.cellSize
+        y1 = row * self.cellSize + self.__y1
+        y2 = y1 + self.cellSize
         self.cells[row][col].draw(x1, y1, x2, y2, animate=False)
 
 class Cell:
@@ -238,16 +240,22 @@ class Cell:
             color = "red"
         if self.__win:
             self.__win.drawLine(Line(self.ctr, to_cell.ctr), color)
+        pass
 
 class Player:
     def __init__(self, window, x, y, maze):
         self.window = window
         self.row = 0
         self.col = 0
-        self.color = "blue"
-        self.size = 24
+        self.color = "yellow"
+        self.size = maze.cellSize // 3
         self.maze = maze
         self.currentCell = self.maze.cells[self.row][self.col]
+        
+        self.wallHits = 0
+        self.totalMoves = 0
+        self.validMoves = 0
+        
         self.draw()
 
     def getPosition(self):
@@ -259,11 +267,15 @@ class Player:
             center.x - self.size//2,
             center.y - self.size//2, 
             self.size, 
-            self.color
+            self.color,
+            self.size
         )
     
     def move(self, direction):
+        self.totalMoves += 1
+        
         if self.isMoveValid(direction):
+            self.validMoves += 1
             oldPosition = self.getPosition()
             
             if direction == "up":
@@ -281,14 +293,12 @@ class Player:
             newPosition = self.getPosition()
             self.window.animatePlayer(oldPosition, newPosition)
             
-            print(f"Move: ({self.row}, {self.col})")
-            print(f"Cell walls - Top: {self.currentCell.hasTopWall}")
-            print(f"Bottom: {self.currentCell.hasBottomWall}")
-            print(f"Left: {self.currentCell.hasLeftWall}")  
-            print(f"Right: {self.currentCell.hasRightWall}")
+            print(f"Move: ({self.row}, {self.col}) | Valid: {self.validMoves}/{self.totalMoves}")
         else:
-            print(f"Invalid move {direction}")
-            print(f"Current cell: ({self.row}, {self.col})")
+            self.wallHits += 1
+            currentPosition = self.getPosition()
+            self.window.animateBounce(currentPosition, direction, self.maze.cellSize)
+            print(f"Wall hit #{self.wallHits} - bouncing off {direction} wall")
 
     def isMoveValid(self, direction):
         if direction == "up":
