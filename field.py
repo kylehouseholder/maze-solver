@@ -22,6 +22,16 @@ class Maze:
         self.__breakEnds()
         self.__breakWalls(0, 0)
         self.__resetCells()
+        
+        # Create player and set up keyboard callback
+        self.__player = Player(self.__win, 0, 0)
+        if self.__win:
+            self.__win.setKeyCallback(self.playerMove)
+        
+        # Create player and set up keyboard callback
+        self.__player = Player(self.__win, 0, 0)
+        if self.__win:
+            self.__win.setKeyCallback(self.playerMove)
 
     def __animate(self):
         if self.__win:
@@ -163,6 +173,14 @@ class Maze:
                         currentCell.path(nextCell, undo = True)
         return False
 
+    def getPlayer(self):
+        return self.__player
+    
+    def playerMove(self, direction):
+        print(f"Player moving {direction}")
+        # TODO: Add movement validation here
+        self.__player.move(direction)
+
 class Cell:
     def __init__(self, window, row, col):
         self.__win = window
@@ -202,3 +220,30 @@ class Cell:
             color = "red"
         if self.__win:
             self.__win.drawLine(Line(self.ctr, to_cell.ctr), color)
+
+class Player:
+    def __init__(self, window, x, y):
+        self.window = window
+        self.x = x
+        self.y = y
+        self.row = 0
+        self.col = 0
+        self.color = "green"
+        self.width = 20
+        self.height = 20
+    
+    def draw(self):
+        self.window.drawPlayer(self.x, self.y, self.width, self.color)
+    
+    def move(self, direction):
+        if direction == "Up":
+            self.row -= 1
+        elif direction == "Down":
+            self.row += 1
+        elif direction == "Left":
+            self.col -= 1
+        elif direction == "Right":
+            self.col += 1
+        self.x = self.col * self.width
+        self.y = self.row * self.height
+        self.draw()

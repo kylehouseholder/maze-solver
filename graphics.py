@@ -10,6 +10,25 @@ class Window:
         self.__canvas.pack(fill=BOTH, expand=1)
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
+        
+        # Add keyboard handling
+        self.__root.focus_set()
+        self.__root.bind("<Key>", self.keyHandler)
+        self.__keyCallback = None
+
+    def setKeyCallback(self, callbackFunction):
+        """Allow someone else to register for key events"""
+        self.__keyCallback = callbackFunction
+
+    def keyHandler(self, event):
+        if (
+            event.keysym == "Up" or
+            event.keysym == "Down" or
+            event.keysym == "Left" or
+            event.keysym == "Right"
+        ):
+            if self.__keyCallback:
+                self.__keyCallback(event.keysym)
 
     def redraw(self):
         self.__root.update_idletasks()
@@ -26,6 +45,9 @@ class Window:
 
     def drawLine(self, line, fill_color="white"):
         line.draw(self.__canvas, fill_color)
+
+    def drawPlayer(self, x, y, width, color):
+        self.__canvas.create_oval(x, y, x + width, y + width, fill=color)
 
 
 class Point:

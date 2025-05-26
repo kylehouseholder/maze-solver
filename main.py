@@ -22,7 +22,7 @@ def main():
     maze = Maze(10, 10,     # starting offset
                 12, 12,     # rows, columns
                 75, 75,     # cell dimensions
-                0.0035,   # delay between steps
+                0.000001,   # delay between steps
                 win, 14594) # seed
 
     maze.solve()
