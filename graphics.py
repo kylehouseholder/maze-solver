@@ -61,11 +61,11 @@ class Window:
             direction = "left"
         elif key == "d":
             direction = "right"
-        elif key == "k":
+        elif key == "i":
             direction = "up"
-        elif key == "j":
+        elif key == "k":
             direction = "down"
-        elif key == "h":
+        elif key == "j":
             direction = "left"
         elif key == "l":
             direction = "right"
